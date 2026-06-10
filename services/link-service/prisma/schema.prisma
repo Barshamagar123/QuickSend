@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Link {
+  id        String   @id @default(cuid())
+  shortCode String   @unique
+  fileId    String
+  createdAt DateTime @default(now())
+  
+  @@index([shortCode])
+}
