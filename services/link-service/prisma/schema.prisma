@@ -12,6 +12,9 @@ model Link {
   shortCode String   @unique
   fileId    String
   createdAt DateTime @default(now())
+  expiresAt DateTime?
   
   @@index([shortCode])
+    @@index([expiresAt])
+
 }
