@@ -1,3 +1,4 @@
+
 import express from 'express';
 import multer from 'multer';
 import axios from 'axios';
@@ -78,9 +79,9 @@ app.post('/upload', upload.single('file'), async (req: any, res: any) => {
     });
     const { shortCode, expiresAt } = linkRes.data;
 
-    // 3. Generate QR code using qr-service
-    // We request qr-service to encode the shortCode, which it will resolve to the full link
-    const qrRes = await axios.get(`${QR_SERVICE_URL}/generate/${shortCode}`);
+    // 3. Generate QR code using qr-service (FIXED: encode the full URL)
+    const fullUrl = `${GATEWAY_URL}/view/${shortCode}`;
+    const qrRes = await axios.get(`${QR_SERVICE_URL}/generate/${encodeURIComponent(fullUrl)}`);
     const { qr } = qrRes.data;
 
     const downloadUrl = `${GATEWAY_URL}/view/${shortCode}`;
