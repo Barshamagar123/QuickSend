@@ -117,3 +117,4 @@ app.use('/services/:serviceName/health', (req: any, res: any, next: any) => {
 app.listen(PORT, () => {
   console.log(`✅ Gateway running on port ${PORT}`);
 });
+ 
