@@ -52,6 +52,9 @@ app.get('/health', (req, res) => {
 app.use('/upload', createProxyMiddleware({
   target: process.env.UPLOAD_SERVICE_URL || 'http://upload-service:3001',
   changeOrigin: true,
+  pathRewrite: {
+    '^/': '/upload'
+  },
   on: {
     proxyReq: (proxyReq: any, req: any) => {
       if (req.headers['x-request-id']) {
@@ -64,6 +67,9 @@ app.use('/upload', createProxyMiddleware({
 app.use('/view', createProxyMiddleware({
   target: process.env.VIEW_SERVICE_URL || 'http://view-service:3004',
   changeOrigin: true,
+  pathRewrite: {
+    '^/': '/view/'
+  },
   on: {
     proxyReq: (proxyReq: any, req: any) => {
       if (req.headers['x-request-id']) {
@@ -77,7 +83,7 @@ app.use('/qr', createProxyMiddleware({
   target: process.env.QR_SERVICE_URL || 'http://qr-service:3003',
   changeOrigin: true,
   pathRewrite: {
-    '^/qr': '/generate/png'
+    '^/': '/generate/png/'
   },
   on: {
     proxyReq: (proxyReq: any, req: any) => {
