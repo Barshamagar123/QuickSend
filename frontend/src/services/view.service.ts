@@ -1,12 +1,9 @@
-
-import { apiClient } from './api';
-
 export async function getFileInfo(shortCode: string) {
-  // Use Gateway - it will route to view-service
-  return apiClient.get(`/view/preview/${shortCode}`);
+  const response = await fetch(`http://localhost:3004/preview/${shortCode}`);
+  if (!response.ok) throw new Error(`Failed: ${response.status}`);
+  return response.json();
 }
 
 export function downloadFile(shortCode: string) {
-  // Use Gateway URL
-  window.open(`http://localhost:3000/view/${shortCode}`, '_blank');
+  window.open(`http://localhost:3004/view/${shortCode}`, '_blank');
 }

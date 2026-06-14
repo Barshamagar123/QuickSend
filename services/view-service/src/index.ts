@@ -7,6 +7,19 @@ const PORT = process.env.PORT || 3004;
 const LINK_SERVICE_URL = process.env.LINK_SERVICE_URL || 'http://link-service:3002';
 const FILE_STORAGE_SERVICE_URL = process.env.FILE_STORAGE_SERVICE_URL || 'http://file-storage-service:3005';
 
+// CORS middleware - MUST be first
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
 
 app.get('/health', (req, res) => {
@@ -18,7 +31,6 @@ app.get('/view/:shortCode', async (req: any, res: any) => {
   try {
     const { shortCode } = req.params;
 
-    // 1. Resolve shortCode to fileId
     let fileId: string;
     try {
       const linkRes = await axios.get(`${LINK_SERVICE_URL}/resolve/${shortCode}`);
@@ -33,7 +45,6 @@ app.get('/view/:shortCode', async (req: any, res: any) => {
       throw err;
     }
 
-    // 2. Fetch/stream file from file-storage-service and pipe to client
     const fileUrl = `${FILE_STORAGE_SERVICE_URL}/file/${fileId}`;
     const fileStreamRes = await axios({
       method: 'get',
@@ -41,7 +52,6 @@ app.get('/view/:shortCode', async (req: any, res: any) => {
       responseType: 'stream'
     });
 
-    // Pass headers
     res.setHeader('Content-Type', fileStreamRes.headers['content-type'] || 'application/octet-stream');
     res.setHeader('Content-Disposition', fileStreamRes.headers['content-disposition'] || 'attachment');
     if (fileStreamRes.headers['content-length']) {
@@ -55,12 +65,11 @@ app.get('/view/:shortCode', async (req: any, res: any) => {
   }
 });
 
-// GET /preview/:shortCode - Preview metadata
+// GET /preview/:shortCode - Preview metadata (returns JSON)
 app.get('/preview/:shortCode', async (req: any, res: any) => {
   try {
     const { shortCode } = req.params;
 
-    // 1. Resolve shortCode
     let fileId: string;
     try {
       const linkRes = await axios.get(`${LINK_SERVICE_URL}/resolve/${shortCode}`);
@@ -75,7 +84,6 @@ app.get('/preview/:shortCode', async (req: any, res: any) => {
       throw err;
     }
 
-    // 2. Get metadata
     const metaRes = await axios.get(`${FILE_STORAGE_SERVICE_URL}/metadata/${fileId}`);
     res.json(metaRes.data);
   } catch (error: any) {
